@@ -58,11 +58,23 @@ export function LocationSectionOpenStreetMap({
     setShowHours(!showHours)
   }
 
-  const copyAddressToClipboard = () => {
-    try {
-      const address = getFullAddress()
+  const copyAddressToClipboard = async () => {
+    const address = getFullAddress()
 
-      // Fallback method for sandboxed environments
+    // Try modern Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(address)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+        return
+      } catch (err) {
+        console.log('Clipboard API failed, using fallback method')
+      }
+    }
+
+    // Fallback method for sandboxed environments
+    try {
       const textArea = document.createElement('textarea')
       textArea.value = address
       textArea.style.position = 'fixed'
@@ -72,12 +84,10 @@ export function LocationSectionOpenStreetMap({
       textArea.focus()
       textArea.select()
 
-      try {
-        document.execCommand('copy')
+      const successful = document.execCommand('copy')
+      if (successful) {
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
-      } catch (err) {
-        console.error('Failed to copy address:', err)
       }
 
       document.body.removeChild(textArea)
