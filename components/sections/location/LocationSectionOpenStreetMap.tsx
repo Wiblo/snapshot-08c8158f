@@ -8,7 +8,6 @@ import { Container } from "@/components/layout/Container"
 import { SectionWrapper } from "@/components/layout/SectionWrapper"
 import {
   businessInfo,
-  getGoogleMapsDirectionsUrl,
   getPhoneLink,
   getEmailLink,
 } from "@/lib/data/business-info"
@@ -40,8 +39,6 @@ export function LocationSectionOpenStreetMap({
   const [showHours, setShowHours] = useState(false)
   const [status, setStatus] = useState<{ isOpen: boolean; message: string } | null>(null)
 
-  const directionsUrl = getGoogleMapsDirectionsUrl()
-
   // Generate OpenStreetMap embed URL
   const getOpenStreetMapEmbedUrl = () => {
     const { latitude, longitude } = businessInfo.geo
@@ -54,6 +51,14 @@ export function LocationSectionOpenStreetMap({
 
     return `https://www.openstreetmap.org/export/embed.html?bbox=${lonMin}%2C${latMin}%2C${lonMax}%2C${latMax}&layer=mapnik&marker=${latitude}%2C${longitude}`
   }
+
+  // Generate OpenStreetMap directions URL
+  const getOpenStreetMapDirectionsUrl = () => {
+    const { latitude, longitude } = businessInfo.geo
+    return `https://www.openstreetmap.org/directions?to=${latitude}%2C${longitude}#map=15/${latitude}/${longitude}`
+  }
+
+  const directionsUrl = getOpenStreetMapDirectionsUrl()
 
   const toggleHours = () => {
     setShowHours(!showHours)
