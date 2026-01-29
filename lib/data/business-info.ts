@@ -18,18 +18,18 @@ export const businessInfo = {
 
   // Physical Location
   address: {
-    street: "123 Main Street",
-    area: "", // Optional: neighborhood, suite, or building name
-    city: "Your City",
-    state: "ST",
-    zip: "00000",
-    country: "US",
+    street: "125 5th Street",
+    area: "Parkmore", // Optional: neighborhood, suite, or building name
+    city: "Johannesburg",
+    state: "Gauteng",
+    zip: "2196",
+    country: "ZA",
   },
 
   // Coordinates for maps (optional - set to 0 if unknown)
   geo: {
-    latitude: 0,
-    longitude: 0,
+    latitude: -26.0669,
+    longitude: 28.0667,
   },
 
   // Google Maps configuration
@@ -54,7 +54,7 @@ export const businessInfo = {
   } as Record<string, string>,
 
   // Timezone for open/closed status calculation
-  timezone: "America/New_York",
+  timezone: "Africa/Johannesburg",
 
   // Social Media (leave empty string if not used)
   social: {
