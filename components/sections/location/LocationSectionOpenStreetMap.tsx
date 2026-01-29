@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ChevronDown, ArrowRight, ChevronRight } from "lucide-react"
+import { ChevronDown, ArrowRight, ChevronRight, Copy, Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Container } from "@/components/layout/Container"
 import { SectionWrapper } from "@/components/layout/SectionWrapper"
@@ -10,6 +10,7 @@ import {
   businessInfo,
   getPhoneLink,
   getEmailLink,
+  getFullAddress,
 } from "@/lib/data/business-info"
 
 export interface LocationSectionOpenStreetMapProps {
@@ -38,6 +39,7 @@ export function LocationSectionOpenStreetMap({
 }: LocationSectionOpenStreetMapProps) {
   const [showHours, setShowHours] = useState(false)
   const [status, setStatus] = useState<{ isOpen: boolean; message: string } | null>(null)
+  const [copied, setCopied] = useState(false)
 
   // Generate OpenStreetMap embed URL
   const getOpenStreetMapEmbedUrl = () => {
@@ -52,16 +54,19 @@ export function LocationSectionOpenStreetMap({
     return `https://www.openstreetmap.org/export/embed.html?bbox=${lonMin}%2C${latMin}%2C${lonMax}%2C${latMax}&layer=mapnik&marker=${latitude}%2C${longitude}`
   }
 
-  // Generate OpenStreetMap directions URL
-  const getOpenStreetMapDirectionsUrl = () => {
-    const { latitude, longitude } = businessInfo.geo
-    return `https://www.openstreetmap.org/directions?to=${latitude}%2C${longitude}#map=15/${latitude}/${longitude}`
-  }
-
-  const directionsUrl = getOpenStreetMapDirectionsUrl()
-
   const toggleHours = () => {
     setShowHours(!showHours)
+  }
+
+  const copyAddressToClipboard = async () => {
+    try {
+      const address = getFullAddress()
+      await navigator.clipboard.writeText(address)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy address:', err)
+    }
   }
 
   // Parse time string like "9:00 AM" to decimal hours (9.0)
@@ -184,54 +189,52 @@ export function LocationSectionOpenStreetMap({
                       </span>
                     </div>
 
-                    <Link
-                      href={directionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={copyAddressToClipboard}
                       className="group relative flex min-h-12 items-center justify-center whitespace-nowrap rounded-lg border border-border px-6 py-3 font-medium text-muted-foreground transition-[background-color,border-radius] hover:rounded-xl hover:bg-secondary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      aria-label="Get Directions"
+                      aria-label="Copy Address"
                     >
                       <span className="flex flex-1 items-center justify-center gap-x-2">
                         <span className="flex flex-row items-center gap-x-[4px]">
-                          Get Directions
-                          <span className="h-fit w-fit opacity-50 transition-opacity group-hover:opacity-100" aria-hidden="true">
-                            <ChevronRight className="h-4 w-4 translate-x-[-3px] scale-[1.15] transition-transform group-hover:translate-x-0" />
-                          </span>
+                          {copied ? (
+                            <>
+                              Copied!
+                              <Check className="h-4 w-4" aria-hidden="true" />
+                            </>
+                          ) : (
+                            <>
+                              Copy Address
+                              <Copy className="h-4 w-4 opacity-50 transition-opacity group-hover:opacity-100" aria-hidden="true" />
+                            </>
+                          )}
                         </span>
                       </span>
-                    </Link>
+                    </button>
                   </div>
                 )}
 
                 {/* Address and Contact Info (only shown when hours hidden) */}
                 {!showHours ? (
                   <div className="flex flex-row gap-6 sm:gap-20">
-                    <Link
-                      href={directionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <div className="flex flex-col gap-2">
-                        <p className="text-sm font-medium text-muted-foreground">
-                          Address
+                    <div className="flex flex-col gap-2">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Address
+                      </p>
+                      <address className="flex flex-col gap-[2px] not-italic">
+                        <p className="text-sm font-medium text-foreground">
+                          {businessInfo.address.street}
                         </p>
-                        <address className="flex flex-col gap-[2px] not-italic">
+                        {businessInfo.address.area && (
                           <p className="text-sm font-medium text-foreground">
-                            {businessInfo.address.street}
+                            {businessInfo.address.area}
                           </p>
-                          {businessInfo.address.area && (
-                            <p className="text-sm font-medium text-foreground">
-                              {businessInfo.address.area}
-                            </p>
-                          )}
-                          <p className="text-sm font-medium text-foreground">
-                            {businessInfo.address.city}, {businessInfo.address.state}{" "}
-                            {businessInfo.address.zip}
-                          </p>
-                        </address>
-                      </div>
-                    </Link>
+                        )}
+                        <p className="text-sm font-medium text-foreground">
+                          {businessInfo.address.city}, {businessInfo.address.state}{" "}
+                          {businessInfo.address.zip}
+                        </p>
+                      </address>
+                    </div>
 
                     <div className="flex flex-col gap-2">
                       <p className="text-sm font-medium text-muted-foreground">
